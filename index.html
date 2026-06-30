@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GG Tracker — Apresentação</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:           #0b0b13;
+      --bg-card:      #13131f;
+      --bg-card2:     #1a1a2a;
+      --purple:       #7c3aed;
+      --purple-glow:  #a855f7;
+      --cyan:         #06b6d4;
+      --cyan-glow:    #22d3ee;
+      --green:        #34d399;
+      --red:          #f87171;
+      --amber:        #fbbf24;
+      --text:         #f0f0f8;
+      --text-sec:     #8888aa;
+      --text-muted:   #55557a;
+      --code-bg:      #07070f;
+      --border:       rgba(124,58,237,.28);
+      --border-cyan:  rgba(6,182,212,.28);
+    }
+
+    html, body {
+      width: 100vw; height: 100vh;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* ─── GRID TEXTURE ─── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(124,58,237,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,58,237,.025) 1px, transparent 1px);
+      background-size: 56px 56px;
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ─── AMBIENT ORBS ─── */
+    .orb {
+      position: fixed; border-radius: 50%;
+      filter: blur(90px); pointer-events: none; z-index: 0;
+    }
+    .orb-a { width: 480px; height: 480px; background: rgba(124,58,237,.07);  top: -120px; right: -120px; }
+    .orb-b { width: 320px; height: 320px; background: rgba(6,182,212,.055);  bottom: -80px; left: -80px; }
+
+    /* ─── CLICK ZONES ─── */
+    .zone {
+      position: fixed; top: 0; height: 100vh; width: 50vw; z-index: 80;
+    }
+    #zL { left:  0; cursor: w-resize; }
+    #zR { right: 0; cursor: e-resize; }
+
+    /* ─── PROGRESS BAR ─── */
+    #prog {
+      position: fixed; bottom: 0; left: 0; height: 3px;
+      background: linear-gradient(90deg, var(--purple), var(--cyan));
+      box-shadow: 0 0 12px var(--purple-glow);
+      transition: width .45s cubic-bezier(.4,0,.2,1);
+      z-index: 90;
+    }
+
+    /* ─── COUNTER ─── */
+    #ctr {
+      position: fixed; bottom: 2.2vh; right: 2.8vw; z-index: 90;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: max(13px,1.5vh);
+      color: var(--text-muted);
+      letter-spacing: 2px;
+    }
+    #ctr em { color: var(--purple-glow); font-style: normal; }
+
+    /* ─── SLIDES WRAPPER ─── */
+    #deck { position: relative; width: 100vw; height: 100vh; }
+
+    /* ─── SLIDE BASE ─── */
+    .slide {
+      position: absolute; inset: 0; z-index: 1;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      padding: 5.5vh 7vw;
+      opacity: 0;
+      pointer-events: none;
+      will-change: opacity, transform;
+    }
+    .slide.vis {
+      opacity: 1; pointer-events: none;
+      transform: translateX(0) !important;
+    }
+
+    /* ─── TYPOGRAPHY ─── */
+    .eyebrow {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: max(11px, 1.35vh);
+      color: var(--cyan);
+      letter-spacing: 4px; text-transform: uppercase;
+      padding: .45vh 1vw;
+      background: rgba(6,182,212,.09);
+      border: 1px solid var(--border-cyan);
+      border-radius: 4px;
+      margin-bottom: 2vh;
+    }
+    .eyebrow.purple {
+      color: var(--purple-glow);
+      background: rgba(168,85,247,.09);
+      border-color: var(--border);
+    }
+
+    .h1 {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: max(38px, 5.2vh);
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      background: linear-gradient(130deg, #fff 30%, var(--purple-glow) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 2.5vh;
+      text-align: center;
+    }
+
+    .body {
+      font-size: max(19px, 2.4vh);
+      color: var(--text-sec);
+      line-height: 1.72;
+    }
+
+    /* ─── COVER ─── */
+    .cover-pretitle {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: max(11px,1.4vh);
+      color: var(--cyan);
+      letter-spacing: 5px; text-transform: uppercase;
+      margin-bottom: 2.5vh; opacity: .8;
+    }
+    .cover-title {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: max(88px, 13vh);
+      font-weight: 700;
+      letter-spacing: 7px; text-transform: uppercase;
+      line-height: 1;
+      background: linear-gradient(140deg, #fff 15%, var(--purple-glow) 55%, var(--cyan-glow) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 32px rgba(168,85,247,.38));
+    }
+    .cover-rule {
+      width: 130px; height: 3px;
+      background: linear-gradient(90deg, var(--purple), var(--cyan));
+      border-radius: 2px;
+      box-shadow: 0 0 14px var(--purple-glow);
+      margin: 2.8vh auto;
+    }
+    .cover-tagline {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: max(18px, 2.3vh);
+      font-weight: 600;
+      letter-spacing: 4px; text-transform: uppercase;
+      color: var(--text-sec);
+      text-align: center;
+      margin-bottom: 3.5vh;
+    }
+    .cover-meta {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 1vh;
+    }
+    .meta-row {
+      display: flex; align-items: baseline; gap: 1.2vw;
+      font-size: max(14px, 1.75vh);
+      color: var(--text-sec);
+    }
+    .meta-row .lbl {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: max(11px, 1.3vh);
+      color: var(--purple-glow);
+      font-weight: 600; letter-spacing: 1.5px;
+      text-transform: uppercase;
+      min-width: 9ch;
+    }
+
+    /* ─── SUMÁRIO ─── */
+    .sum-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.6vh 3.5vw;
+      width: 100%; max-width: 82vw;
+      margin-top: 2vh;
+    }
+    .sum-item {
+      display: flex; align-items: center; gap: 1.4vw;
+      padding: 1.5vh 1.8vw;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: max(17px, 2.1vh);
+      color: var(--text);
+      transition: border-color .2s;
+    }
+    .sum-n {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: max(13px, 1.6vh);
+      color: var(--cyan); font-weight: 700;
+      min-width: 2.4ch;
+    }
+
+    /* ─── CARD ─── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2.8vh 2.8vw;
+      width: 100%; max-width: 84vw;
+    }
+
+    /* ─── BULLETS ─── */
+    .blist { list-style: none; display: flex; flex-direction: column; gap: 1.6vh; margin-top: 2vh; }
+    .blist li {
+      display: flex; align-items: flex-start; gap: 1.2vw;
+      font-size: max(19px, 2.3vh);
+      color: var(--text); line-height: 1.5;
+    }
+    .blist li::before {
+      content: '▹'; color: var(--purple-glow);
+      font-size: max(17px, 2.1vh); flex-shrink: 0;
+    }
+    .blist.sm li { font-size: max(16px, 2vh); }
+
+    /* ─── TWO-COL ─── */
+    .tcol {
+      display: grid;
+      grid-template-columns: 1fr 1.12fr;
+      gap: 3.5vw;
+      width: 100%; max-width: 92vw;
+      align-items: center;
+    }
+    .tcol-text { display: flex; flex-direction: column; gap: 1.4vh; }
+
+    /* ─── CODE ─── */
+    .code-wrap {
+      background: var(--code-bg);
+      border: 1px solid rgba(124,58,237,.42);
+      border-radius: 10px;
+      overflow: hidden;
+      width: 100%;
+    }
+    .code-bar {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 1.1vh 1.8vw;
+      background: rgba(124,58,237,.11);
+      border-bottom: 1px solid rgba(124,58,237,.28);
+    }
+    .code-lang {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: max(10px, 1.3vh);
+      color: var(--purple-glow);
+      letter-spacing: 2.5px; text-transform: uppercase;
+    }
+    .dots { display: flex; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dr { background: #ff5f57; }
+    .dy { background: #ffbd2e; }
+    .dg { background: #28c840; }
+
+    pre { padding: 2.2vh 2.2vw; overflow-x: auto; scrollbar-width: none; }
+    pre::-webkit-scrollbar { display: none; }
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: max(16px, 2.05vh);
+      line-height: 1.82;
+      white-space: pre;
+    }
+    /* Syntax */
+    .kw { color: #c084fc; font-weight: 600; }
+    .ty { color: #60a5fa; }
+    .fn { color: #34d399; }
+    .st { color: #fbbf24; }
+    .cm { color: #4b5a6a; font-style: italic; }
+    .op { color: #f472b6; }
+    .va { color: #e0e0f8; }
+    .nu { color: #fb923c; }
+
+    /* ─── MVVM DIAGRAM ─── */
+    .mvvm {
+      display: flex; align-items: stretch;
+      justify-content: center; gap: 0;
+      width: 100%; max-width: 90vw;
+      margin-top: 2.5vh;
+    }
+    .mbox {
+      flex: 1;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2.4vh 1.8vw;
+    }
+    .mbox.hi {
+      border-color: var(--purple-glow);
+      box-shadow: 0 0 24px rgba(168,85,247,.18);
+    }
+    .mbox-t {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: max(18px, 2.2vh);
+      font-weight: 700; letter-spacing: 2px;
+      color: var(--purple-glow);
+      margin-bottom: 1.2vh;
+    }
+    .mbox-sub { font-size: max(13px, 1.6vh); color: var(--text-sec); margin-bottom: 1.2vh; }
+    .mbox-items { list-style: none; display: flex; flex-direction: column; gap: .6vh; }
+    .mbox-items li {
+      font-size: max(13px, 1.6vh);
+      color: var(--text); padding-left: 1em;
+      position: relative;
+    }
+    .mbox-items li::before { content:'›'; position:absolute; left:0; color: var(--cyan); }
+
+    .marrow {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: .6vh; padding: 0 1.6vw;
+      flex-shrink: 0;
+    }
+    .marrow .arr { font-size: max(22px, 2.8vh); color: var(--cyan); }
+    .marrow .lbl {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: max(10px, 1.15vh);
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    /* ─── PHASE BADGE ─── */
+    .phase {
+      display: inline-flex; align-items: center; gap: .8vw;
+      padding: .7vh 1.4vw;
+      background: rgba(124,58,237,.12);
+      border: 1px solid var(--purple);
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: max(12px, 1.45vh);
+      color: var(--purple-glow);
+      letter-spacing: 2px;
+      margin-bottom: 2vh;
+    }
+    .phase.cy {
+      background: rgba(6,182,212,.1);
+      border-color: var(--cyan);
+      color: var(--cyan-glow);
+    }
+
+    /* ─── DEMO ─── */
+    .demo-big {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: max(54px, 8.5vh);
+      font-weight: 700; text-align: center;
+      background: linear-gradient(135deg, #fff, var(--purple-glow), var(--cyan-glow));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 3vh;
+    }
+
+    /* ─── CONCLUSION ─── */
+    .qcite {
+      font-size: max(20px, 2.6vh);
+      color: var(--text); line-height: 1.76;
+      text-align: center; max-width: 76vw;
+      padding: 3vh 3.5vw;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--purple-glow);
+      border-right: 4px solid var(--cyan);
+      border-radius: 8px;
+      margin-bottom: 3.5vh;
+    }
+    .thanks {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: max(42px, 5.8vh);
+      font-weight: 700; letter-spacing: 3px;
+      text-align: center; color: var(--text);
+      margin-bottom: 2vh;
+    }
+
+    /* ─── PROPOSTA ICONS ─── */
+    .icon-grid {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 1.4vh 1.8vw; margin-top: 2.5vh;
+    }
+    .icon-card {
+      background: var(--bg-card2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2vh 1.6vw; text-align: center;
+    }
+    .icon-card .ico  { font-size: max(26px, 3.3vh); margin-bottom: .8vh; }
+    .icon-card .lbl  { font-size: max(14px, 1.85vh); color: var(--cyan); font-weight: 600; margin-bottom: .6vh; }
+    .icon-card .desc { font-size: max(12px, 1.5vh); color: var(--text-sec); line-height: 1.5; }
+
+    /* ─── BEFORE / AFTER ─── */
+    .diff-box {
+      background: var(--bg-card);
+      border-radius: 8px;
+      padding: 1.4vh 1.6vw;
+      font-size: max(14px, 1.75vh);
+      color: var(--text-sec);
+      line-height: 1.55;
+    }
+    .diff-box .tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: max(10px, 1.3vh);
+      letter-spacing: 2.5px;
+      display: block; margin-bottom: .6vh;
+    }
+
+    /* ─── FLOW TAG ─── */
+    .flow-pill {
+      background: rgba(168,85,247,.08);
+      border: 1px solid rgba(168,85,247,.24);
+      border-radius: 8px;
+      padding: 1.4vh 1.6vw;
+      font-size: max(13px, 1.6vh);
+      color: var(--text-sec); line-height: 1.55;
+    }
+    .flow-pill .title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: max(10px, 1.3vh);
+      color: var(--purple-glow);
+      letter-spacing: 2.5px;
+      display: block; margin-bottom: .6vh;
+    }
+
+    /* ─── STATE BARS (slide 10) ─── */
+    .state-bar {
+      background: var(--bg-card);
+      border-left: 3px solid transparent;
+      padding: 1.1vh 1.4vw;
+      border-radius: 0 6px 6px 0;
+      font-size: max(14px, 1.75vh);
+      color: var(--text-sec);
+    }
+    .state-bar .lbl { font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <div class="orb orb-a"></div>
+  <div class="orb orb-b"></div>
+
+  <div id="zL" class="zone"></div>
+  <div id="zR" class="zone"></div>
+
+  <div id="prog"></div>
+  <div id="ctr"><em id="cur">1</em> / <span id="tot">12</span></div>
+
+  <div id="deck">
+
+    <!-- ══════════════════ SLIDE 1 — CAPA ══════════════════ -->
+    <div class="slide vis" id="s1">
+      <div class="cover-pretitle">// Apresentação Final — Banca Examinadora</div>
+      <div class="cover-title">GG Tracker</div>
+      <div class="cover-rule"></div>
+      <div class="cover-tagline">Arquitetura MVVM · Riverpod · Drift</div>
+      <div class="cover-meta">
+        <div class="meta-row">
+          <span class="lbl">Alunos</span>
+          Victor Silva do Valle &amp; Arthur Ribeiro Lima
+        </div>
+        <div class="meta-row">
+          <span class="lbl">Orientador</span>
+          Prof. Danilo Ferreira Neves
+        </div>
+        <div class="meta-row">
+          <span class="lbl">Curso</span>
+          Bacharelado em Sistemas de Informação — IFS Campus Lagarto
+        </div>
+        <div class="meta-row">
+          <span class="lbl">Disciplina</span>
+          Programação para Dispositivos Móveis
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ SLIDE 2 — SUMÁRIO ══════════════════ -->
+    <div class="slide" id="s2">
+      <div class="eyebrow">Roteiro</div>
+      <div class="h1">Sumário</div>
+      <div class="sum-grid">
+        <div class="sum-item"><span class="sum-n">01</span> A Proposta do GG Tracker</div>
+        <div class="sum-item"><span class="sum-n">02</span> Concepção e Prototipagem</div>
+        <div class="sum-item"><span class="sum-n">03</span> Amadurecimento e Arquitetura</div>
+        <div class="sum-item"><span class="sum-n">04</span> Padrão MVVM</div>
+        <div class="sum-item"><span class="sum-n">05</span> Persistência Local com Drift</div>
+        <div class="sum-item"><span class="sum-n">06</span> Gerenciamento de Estado (Riverpod)</div>
+        <div class="sum-item"><span class="sum-n">07</span> Interface Reativa</div>
+        <div class="sum-item"><span class="sum-n">08</span> Demonstração Prática</div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ SLIDE 3 — PROPOSTA ══════════════════ -->
+    <div class="slide" id="s3">
+      <div class="eyebrow">O Projeto</div>
+      <div class="h1">A Proposta do GG Tracker</div>
+      <div class="card" style="text-align:center; max-width:78vw;">
+        <p class="body" style="text-align:center; font-size:max(19px,2.4vh);">
+          Um <strong style="color:var(--text);">gerenciador pessoal de biblioteca de jogos</strong>
+          inspirado no MyAnimeList — um <strong style="color:var(--purple-glow);">diário gamer</strong>
+          completo e 100% offline.
+        </p>
+        <div class="icon-grid">
+          <div class="icon-card">
+            <div class="ico">🎮</div>
+            <div class="lbl">Categorias</div>
+            <div class="desc">Jogando · Completos · Em Espera · Abandonado · Planejamento</div>
+          </div>
+          <div class="icon-card">
+            <div class="ico">⭐</div>
+            <div class="lbl">Avaliação</div>
+            <div class="desc">Notas personalizadas e registro de progresso por jogo</div>
+          </div>
+          <div class="icon-card">
+            <div class="ico">🏆</div>
+            <div class="lbl">Conquistas</div>
+            <div class="desc">Acompanhamento de achievements — atual vs. total</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ SLIDE 4 — FASE 1 ══════════════════ -->
+    <div class="slide" id="s4">
+      <div class="phase">▹ FASE INICIAL</div>
+      <div class="h1">Concepção e Prototipagem</div>
+      <div class="tcol">
+        <div class="tcol-text">
+          <p class="body" style="font-size:max(18px,2.25vh);">
+            A primeira versão validou a <strong style="color:var(--text);">interface e o fluxo de interação</strong>
+            no Flutter, consolidando as decisões de UI antes de avançar na arquitetura.
+          </p>
+          <ul class="blist">
+            <li>Arrays em memória para manipulação inicial de dados</li>
+            <li>Listagem dinâmica com abas por categoria de jogo</li>
+            <li>Componentes reutilizáveis: cards, ícones e textos padronizados</li>
+            <li>Simulação de CRUD validando o fluxo completo do usuário</li>
+          </ul>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:1.2vh;">
+          <div style="background:var(--code-bg); border:1px solid var(--border); border-radius:10px; padding:2vh 1.8vw;">
+            <div style="font-family:'JetBrains Mono',monospace; font-size:max(10px,1.3vh); color:var(--text-muted); margin-bottom:1.4vh; letter-spacing:2.5px;">APRENDIZADOS CHAVE</div>
+            <div style="display:flex; flex-direction:column; gap:1vh;">
+              <div style="display:flex; align-items:center; gap:1vw; font-size:max(14px,1.75vh); color:var(--text);">
+                <span style="color:var(--green);">✓</span> Validação de UX e usabilidade
+              </div>
+              <div style="display:flex; align-items:center; gap:1vw; font-size:max(14px,1.75vh); color:var(--text);">
+                <span style="color:var(--green);">✓</span> Widgets Flutter e navegação por abas
+              </div>
+              <div style="display:flex; align-items:center; gap:1vw; font-size:max(14px,1.75vh); color:var(--text);">
+                <span style="color:var(--green);">✓</span> Ciclo de vida de StatefulWidget
+              </div>
+              <div style="display:flex; align-items:center; gap:1vw; font-size:max(14px,1.75vh); color:var(--text-sec); opacity:.55; text-decoration:line-through;">
+                <span style="color:var(--red);">✗</span> Dados voláteis — sem persistência
+              </div>
+              <div style="display:flex; align-items:center; gap:1vw; font-size:max(14px,1.75vh); color:var(--text-sec); opacity:.55; text-decoration:line-through;">
+                <span style="color:var(--red);">✗</span> Código acoplado, difícil de escalar
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ SLIDE 5 — EVOLUÇÃO ══════════════════ -->
+    <div class="slide" id="s5">
+      <div class="phase cy">▸ AMADURECIMENTO</div>
+      <div class="h1">Evolução da Arquitetura</div>
+      <div class="tcol">
+        <div class="tcol-text">
+          <p class="body" style="font-size:max(18px,2.25vh);">
+            Com a base validada, o projeto evoluiu naturalmente: adotamos
+            <strong style="color:var(--text);">padrões de mercado</strong> para
+            garantir escalabilidade e funcionamento offline robusto.
+          </p>
+          <ul class="blist" style="margin-top:1vh;">
+            <li>Separação de responsabilidades com <strong style="color:var(--purple-glow);">MVVM</strong></li>
+            <li>Banco de dados estruturado via <strong style="color:var(--cyan);">Drift / SQLite</strong> — 100% offline</li>
+            <li>Estado global reativo com <strong style="color:var(--purple-glow);">Riverpod</strong> — sem setState excessivos</li>
+          </ul>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:1.4vh;">
+          <div class="diff-box" style="border:1px solid rgba(248,113,113,.3);">
+            <span class="tag" style="color:var(--red);">ANTES</span>
+            Arrays voláteis, setState em cascata, lógica de negócio misturada na View
+          </div>
+          <div style="text-align:center; font-size:max(22px,2.8vh); color:var(--purple-glow);">↓</div>
+          <div class="diff-box" style="border:1px solid rgba(52,211,153,.3);">
+            <span class="tag" style="color:var(--green);">DEPOIS</span>
+            SQLite persistente, Riverpod reativo, camadas independentes e testáveis
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ SLIDE 6 — MVVM ══════════════════ -->
+    <div class="slide" id="s6">
+      <div class="eyebrow">Padrão Arquitetural</div>
+      <div class="h1">Arquitetura MVVM na Prática</div>
+      <p class="body" style="text-align:center; font-size:max(17px,2.1vh); max-width:72vw; margin-bottom:2.5vh;">
+        A View não sabe como o banco funciona —
+        ela apenas <strong style="color:var(--cyan);">reage às variáveis</strong> entregues pela ViewModel.
+        Dividimos o app em 3 camadas independentes.
+      </p>
+      <div class="mvvm">
+        <div class="mbox">
+          <div class="mbox-t">CORE / DATA</div>
+          <div class="mbox-sub">Acesso aos dados</div>
+          <ul class="mbox-items">
+            <li>Tabelas Drift</li>
+            <li>AppDatabase</li>
+            <li>JogoRepository</li>
+          </ul>
+        </div>
+        <div class="marrow">
+          <span class="arr">→</span>
+          <span class="lbl">watch/read</span>
+          <span class="arr">←</span>
+          <span class="lbl">invalidate</span>
+        </div>
+        <div class="mbox hi">
+          <div class="mbox-t">VIEWMODEL</div>
+          <div class="mbox-sub">Lógica de negócio</div>
+          <ul class="mbox-items">
+            <li>Riverpod Providers</li>
+            <li>JogoViewModel</li>
+            <li>FutureProvider</li>
+          </ul>
+        </div>
+        <div class="marrow">
+          <span class="arr">→</span>
+          <span class="lbl">rebuild</span>
+          <span class="arr">←</span>
+          <span class="lbl">eventos</span>
+        </div>
+        <div class="mbox">
+          <div class="mbox-t">PRESENTATION</div>
+          <div class="mbox-sub">Exibição e interação</div>
+          <ul class="mbox-items">
+            <li>ConsumerWidget</li>
+            <li>HomePage</li>
+            <li>GameCard</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ SLIDE 7 — DRIFT TABLE ══════════════════ -->
+    <div class="slide" id="s7">
+      <div class="eyebrow">Camada Core</div>
+      <div class="h1">Banco de Dados — Drift</div>
+      <div class="tcol">
+        <div class="tcol-text">
+          <p class="body" style="font-size:max(17px,2.1vh);">
+            O Drift gera nossa tabela <strong style="color:var(--cyan);">Jogos</strong>
+            no SQLite. O modelo é <strong style="color:var(--text);">tipado e seguro</strong>
+            — sem erros de coluna em tempo de execução.
+          </p>
+          <div style="display:flex; flex-direction:column; gap:.85vh; margin-top:1.8vh;">
+            <div style="font-size:max(14px,1.72vh); color:var(--text-sec);">
+              <span style="color:var(--cyan);">IntColumn</span> → INT com autoIncrement (PK)
+            </div>
+            <div style="font-size:max(14px,1.72vh); color:var(--text-sec);">
+              <span style="color:var(--cyan);">TextColumn</span> → VARCHAR com validação de tamanho
+            </div>
+            <div style="font-size:max(14px,1.72vh); color:var(--text-sec);">
+              <span style="color:var(--cyan);">RealColumn</span> → REAL para a nota decimal
+            </div>
+            <div style="font-size:max(14px,1.72vh); color:var(--text-sec);">
+              <span style="color:var(--cyan);">@DataClassName</span> → Nomeia a classe gerada
+            </div>
+          </div>
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar">
+            <div class="dots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div>
+            <div class="code-lang">Dart · Drift</div>
+          </div>
+          <pre><code><span class="op">@DataClassName</span>(<span class="st">'Jogo'</span>)
+<span class="kw">class</span> <span class="ty">Jogos</span> <span class="kw">extends</span> <span class="ty">Table</span> {
+  <span class="ty">IntColumn</span> <span class="kw">get</span> <span class="fn">id</span>
+    <span class="op">=></span> <span class="fn">integer</span>().<span class="fn">autoIncrement</span>()();
+
+  <span class="ty">TextColumn</span> <span class="kw">get</span> <span class="fn">nome</span>
+    <span class="op">=></span> <span class="fn">text</span>().<span class="fn">withLength</span>(
+         min: <span class="nu">1</span>, max: <span class="nu">120</span>)();
+
+  <span class="ty">TextColumn</span>  <span class="kw">get</span> <span class="fn">status</span>
+    <span class="op">=></span> <span class="fn">text</span>()();
+
+  <span class="ty">IntColumn</span>  <span class="kw">get</span> <span class="fn">conquistasAtuais</span>
+    <span class="op">=></span> <span class="fn">integer</span>()();
+
+  <span class="ty">IntColumn</span>  <span class="kw">get</span> <span class="fn">conquistasTotal</span>
+    <span class="op">=></span> <span class="fn">integer</span>()();
+
+  <span class="ty">RealColumn</span> <span class="kw">get</span> <span class="fn">nota</span>
+    <span class="op">=></span> <span class="fn">real</span>()();
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ SLIDE 8 — REPOSITÓRIO ══════════════════ -->
+    <div class="slide" id="s8">
+      <div class="eyebrow">Camada Data</div>
+      <div class="h1">O Repositório</div>
+      <div class="tcol">
+        <div class="tcol-text">
+          <p class="body" style="font-size:max(17px,2.1vh);">
+            O <strong style="color:var(--purple-glow);">JogoRepository</strong>
+            encapsula <em>todas</em> as consultas ao banco — a ViewModel nunca
+            toca o SQLite diretamente.
+          </p>
+          <ul class="blist sm" style="margin-top:1.4vh;">
+            <li>Ordenação por nome garantida no repositório</li>
+            <li>Inserção via JogosCompanion — tipado e seguro</li>
+            <li>Fácil de trocar a fonte de dados no futuro</li>
+          </ul>
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar">
+            <div class="dots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div>
+            <div class="code-lang">Dart · Repository</div>
+          </div>
+          <pre><code><span class="ty">Future</span>&lt;<span class="ty">List</span>&lt;<span class="ty">Jogo</span>&gt;&gt; <span class="fn">listarJogos</span>() {
+  <span class="kw">return</span> (database
+    .<span class="fn">select</span>(database.jogos)
+    ..<span class="fn">orderBy</span>([(<span class="va">t</span>) <span class="op">=></span>
+      <span class="ty">OrderingTerm</span>.<span class="fn">asc</span>(<span class="va">t</span>.nome)])
+  ).<span class="fn">get</span>();
+}
+
+<span class="ty">Future</span>&lt;<span class="kw">void</span>&gt; <span class="fn">cadastrarJogo</span>(
+    <span class="ty">JogosCompanion</span> <span class="va">jogo</span>) <span class="kw">async</span> {
+  <span class="kw">await</span> database
+    .<span class="fn">into</span>(database.jogos)
+    .<span class="fn">insert</span>(<span class="va">jogo</span>);
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ SLIDE 9 — RIVERPOD ══════════════════ -->
+    <div class="slide" id="s9">
+      <div class="eyebrow">Camada de Negócio</div>
+      <div class="h1">Riverpod &amp; ViewModel</div>
+      <div class="tcol">
+        <div class="tcol-text">
+          <p class="body" style="font-size:max(17px,2.1vh);">
+            A <strong style="color:var(--purple-glow);">JogoViewModel</strong>
+            conecta repositório e interface. Após salvar,
+            <code style="background:var(--code-bg); padding:1px 7px; border-radius:4px; color:var(--cyan); font-size:.88em;">ref.invalidate</code>
+            avisa toda a árvore de widgets para se reconstruir.
+          </p>
+          <div class="flow-pill" style="margin-top:1.8vh;">
+            <span class="title">FLUXO REATIVO</span>
+            View aciona ação → ViewModel salva no Repositório →
+            <span style="color:var(--purple-glow);">ref.invalidate()</span>
+            → Provider recarrega → View atualiza sozinha
+          </div>
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar">
+            <div class="dots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div>
+            <div class="code-lang">Dart · Riverpod</div>
+          </div>
+          <pre><code><span class="kw">final</span> <span class="va">jogosProvider</span> <span class="op">=</span>
+  <span class="ty">FutureProvider</span>&lt;<span class="ty">List</span>&lt;<span class="ty">Jogo</span>&gt;&gt;(
+    (<span class="va">ref</span>) <span class="kw">async</span> {
+      <span class="kw">final</span> <span class="va">repo</span> <span class="op">=</span> <span class="va">ref</span>.<span class="fn">watch</span>(
+        <span class="va">jogoRepositoryProvider</span>);
+      <span class="kw">return</span> <span class="va">repo</span>.<span class="fn">listarJogos</span>();
+  });
+
+<span class="cm">// Na ViewModel, após inserir no banco:</span>
+<span class="va">ref</span>.<span class="fn">invalidate</span>(
+  <span class="va">jogosProvider</span>); <span class="cm">// ← Notifica a View!</span></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ SLIDE 10 — REACTIVE UI ══════════════════ -->
+    <div class="slide" id="s10">
+      <div class="eyebrow">Camada Presentation</div>
+      <div class="h1">Interface Reativa</div>
+      <div class="tcol">
+        <div class="tcol-text">
+          <p class="body" style="font-size:max(17px,2.1vh);">
+            A <strong style="color:var(--purple-glow);">HomePage</strong> usa
+            <code style="background:var(--code-bg); padding:1px 7px; border-radius:4px; color:var(--cyan); font-size:.88em;">ConsumerStatefulWidget</code>
+            e reage automaticamente aos 3 estados do Provider.
+          </p>
+          <div style="display:flex; flex-direction:column; gap:1vh; margin-top:1.8vh;">
+            <div class="state-bar" style="border-left-color:var(--amber);">
+              <span class="lbl" style="color:var(--amber);">loading</span>
+              → Exibe CircularProgressIndicator
+            </div>
+            <div class="state-bar" style="border-left-color:var(--red);">
+              <span class="lbl" style="color:var(--red);">error</span>
+              → Exibe mensagem de erro descritiva
+            </div>
+            <div class="state-bar" style="border-left-color:var(--green);">
+              <span class="lbl" style="color:var(--green);">data</span>
+              → Filtra por aba e exibe lista de jogos
+            </div>
+          </div>
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar">
+            <div class="dots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div>
+            <div class="code-lang">Dart · Flutter</div>
+          </div>
+          <pre><code><span class="kw">final</span> <span class="va">jogosAsync</span> <span class="op">=</span>
+  <span class="va">ref</span>.<span class="fn">watch</span>(<span class="va">jogosProvider</span>);
+
+body: <span class="va">jogosAsync</span>.<span class="fn">when</span>(
+
+  <span class="fn">loading</span>: () <span class="op">=></span> <span class="kw">const</span>
+    <span class="ty">CircularProgressIndicator</span>(),
+
+  <span class="fn">error</span>: (<span class="va">e</span>, <span class="va">stack</span>) <span class="op">=></span>
+    <span class="ty">Text</span>(<span class="st">'Erro: </span><span class="op">$</span><span class="va">e</span><span class="st">'</span>),
+
+  <span class="fn">data</span>: (<span class="va">jogos</span>) {
+    <span class="cm">// Filtra e exibe na TabBarView</span>
+  },
+)</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ SLIDE 11 — DEMO ══════════════════ -->
+    <div class="slide" id="s11">
+      <div class="demo-big">🎮 Demo ao Vivo</div>
+      <div class="card" style="max-width:64vw; text-align:center; border-color:rgba(168,85,247,.5); box-shadow:0 0 32px rgba(168,85,247,.13);">
+        <p style="font-size:max(19px,2.35vh); color:var(--text-sec); margin-bottom:2.5vh;">
+          Demonstração no <strong style="color:var(--text);">smartphone</strong>
+        </p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.4vh 2vw;">
+          <div style="display:flex; align-items:center; gap:1vw; font-size:max(16px,2vh); color:var(--text);">
+            <span style="color:var(--cyan);">▹</span> Cadastro de jogo
+          </div>
+          <div style="display:flex; align-items:center; gap:1vw; font-size:max(16px,2vh); color:var(--text);">
+            <span style="color:var(--cyan);">▹</span> Edição e exclusão
+          </div>
+          <div style="display:flex; align-items:center; gap:1vw; font-size:max(16px,2vh); color:var(--text);">
+            <span style="color:var(--cyan);">▹</span> Filtros por abas
+          </div>
+          <div style="display:flex; align-items:center; gap:1vw; font-size:max(16px,2vh); color:var(--text);">
+            <span style="color:var(--cyan);">▹</span> Persistência ao fechar o app
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ SLIDE 12 — CONCLUSÃO ══════════════════ -->
+    <div class="slide" id="s12">
+      <div class="eyebrow">Encerramento</div>
+      <div class="h1">Conclusão</div>
+      <div class="qcite">
+        O GG Tracker prova que a adoção do
+        <strong style="color:var(--purple-glow);">MVVM</strong> com
+        <strong style="color:var(--purple-glow);">Riverpod</strong> e
+        <strong style="color:var(--cyan);">Drift</strong>
+        transforma um protótipo em uma aplicação
+        <em>escalável, robusta e pronta para produção</em>.
+      </div>
+      <div class="thanks">Obrigado! ✌️</div>
+      <p style="font-size:max(18px,2.25vh); color:var(--text-sec); text-align:center; letter-spacing:.5px; margin-bottom:2.5vh;">
+        Abrimos espaço para as perguntas da banca examinadora.
+      </p>
+      <div style="display:flex; align-items:center; gap:2.5vw; justify-content:center;">
+        <span style="font-size:max(13px,1.65vh); color:var(--text-muted);">Victor Silva do Valle</span>
+        <span style="width:4px; height:4px; border-radius:50%; background:var(--purple-glow); display:inline-block;"></span>
+        <span style="font-size:max(13px,1.65vh); color:var(--text-muted);">Arthur Ribeiro Lima</span>
+      </div>
+    </div>
+
+  </div><!-- /deck -->
+
+  <script>
+    const TOTAL = 12;
+    let cur = 1;
+    let busy = false;
+
+    const prog   = document.getElementById('prog');
+    const curEl  = document.getElementById('cur');
+    document.getElementById('tot').textContent = TOTAL;
+
+    function sync() {
+      prog.style.width = (cur / TOTAL * 100) + '%';
+      curEl.textContent = cur;
+    }
+
+    function go(next) {
+      if (busy || next < 1 || next > TOTAL || next === cur) return;
+      busy = true;
+
+      const from = document.getElementById('s' + cur);
+      const to   = document.getElementById('s' + next);
+      const dir  = next > cur ? 1 : -1;
+
+      /* exit current */
+      from.style.transition = 'opacity .42s ease, transform .42s ease';
+      from.style.opacity    = '0';
+      from.style.transform  = `translateX(${-55 * dir}px)`;
+      from.style.pointerEvents = 'none';
+
+      /* prep incoming (instant, off-screen) */
+      to.style.transition   = 'none';
+      to.style.opacity      = '0';
+      to.style.transform    = `translateX(${55 * dir}px)`;
+
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        to.style.transition  = 'opacity .42s ease, transform .42s ease';
+        to.style.opacity     = '1';
+        to.style.transform   = 'translateX(0)';
+        to.style.pointerEvents = 'all';
+      }));
+
+      cur = next;
+      sync();
+
+      setTimeout(() => {
+        from.style.cssText   = '';  /* reset all inline styles */
+        busy = false;
+      }, 460);
+    }
+
+    document.getElementById('zL').addEventListener('click', () => go(cur - 1));
+    document.getElementById('zR').addEventListener('click', () => go(cur + 1));
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ')  go(cur + 1);
+      if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')                     go(cur - 1);
+    });
+
+    sync();
+  </script>
+</body>
+</html>
