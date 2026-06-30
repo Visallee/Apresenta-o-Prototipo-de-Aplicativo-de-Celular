@@ -93,10 +93,7 @@
       pointer-events: none;
       will-change: opacity, transform;
     }
-    .slide.vis {
-      opacity: 1; pointer-events: none;
-      transform: translateX(0) !important;
-    }
+    /* visibility managed entirely via JS inline styles */
 
     /* ─── TYPOGRAPHY ─── */
     .eyebrow {
@@ -464,7 +461,7 @@
   <div id="deck">
 
     <!-- ══════════════════ SLIDE 1 — CAPA ══════════════════ -->
-    <div class="slide vis" id="s1">
+    <div class="slide" id="s1">
       <div class="cover-pretitle">// Apresentação Final — Banca Examinadora</div>
       <div class="cover-title">GG Tracker</div>
       <div class="cover-rule"></div>
@@ -899,46 +896,76 @@ body: <span class="va">jogosAsync</span>.<span class="fn">when</span>(
     let cur = 1;
     let busy = false;
 
-    const prog   = document.getElementById('prog');
-    const curEl  = document.getElementById('cur');
+    const prog  = document.getElementById('prog');
+    const curEl = document.getElementById('cur');
     document.getElementById('tot').textContent = TOTAL;
 
+    const slides = Array.from({length: TOTAL}, (_, i) =>
+      document.getElementById('s' + (i + 1)));
+
+    /* ── helpers ── */
+    function showSlide(el) {
+      el.style.opacity       = '1';
+      el.style.transform     = 'translateX(0)';
+      el.style.pointerEvents = 'all';
+      el.style.zIndex        = '2';
+      el.style.transition    = '';
+    }
+    function hideSlide(el) {
+      el.style.opacity       = '0';
+      el.style.transform     = 'translateX(0)';
+      el.style.pointerEvents = 'none';
+      el.style.zIndex        = '1';
+      el.style.transition    = '';
+    }
+
+    /* initialise: hide every slide, then show the first */
+    slides.forEach(hideSlide);
+    showSlide(slides[0]);
+
     function sync() {
-      prog.style.width = (cur / TOTAL * 100) + '%';
-      curEl.textContent = cur;
+      prog.style.width    = (cur / TOTAL * 100) + '%';
+      curEl.textContent   = cur;
     }
 
     function go(next) {
       if (busy || next < 1 || next > TOTAL || next === cur) return;
       busy = true;
 
-      const from = document.getElementById('s' + cur);
-      const to   = document.getElementById('s' + next);
+      const from = slides[cur - 1];
+      const to   = slides[next - 1];
       const dir  = next > cur ? 1 : -1;
 
-      /* exit current */
-      from.style.transition = 'opacity .42s ease, transform .42s ease';
-      from.style.opacity    = '0';
-      from.style.transform  = `translateX(${-55 * dir}px)`;
+      /* 1 — animate FROM out */
+      from.style.transition    = 'opacity .42s ease, transform .42s ease';
+      from.style.opacity       = '0';
+      from.style.transform     = `translateX(${-55 * dir}px)`;
       from.style.pointerEvents = 'none';
 
-      /* prep incoming (instant, off-screen) */
-      to.style.transition   = 'none';
-      to.style.opacity      = '0';
-      to.style.transform    = `translateX(${55 * dir}px)`;
+      /* 2 — position TO off-screen instantly (no transition) */
+      to.style.transition    = 'none';
+      to.style.opacity       = '0';
+      to.style.transform     = `translateX(${55 * dir}px)`;
+      to.style.pointerEvents = 'none';
+      to.style.zIndex        = '3';
 
+      /* 3 — animate TO in on next paint */
       requestAnimationFrame(() => requestAnimationFrame(() => {
-        to.style.transition  = 'opacity .42s ease, transform .42s ease';
-        to.style.opacity     = '1';
-        to.style.transform   = 'translateX(0)';
+        to.style.transition    = 'opacity .42s ease, transform .42s ease';
+        to.style.opacity       = '1';
+        to.style.transform     = 'translateX(0)';
         to.style.pointerEvents = 'all';
       }));
 
       cur = next;
       sync();
 
+      /* 4 — after animation: clean up FROM (keep opacity:0 inline!) */
       setTimeout(() => {
-        from.style.cssText   = '';  /* reset all inline styles */
+        from.style.transition = '';
+        from.style.transform  = '';
+        from.style.zIndex     = '1';
+        /* opacity stays '0' via inline style — slide stays invisible */
         busy = false;
       }, 460);
     }
@@ -947,8 +974,8 @@ body: <span class="va">jogosAsync</span>.<span class="fn">when</span>(
     document.getElementById('zR').addEventListener('click', () => go(cur + 1));
 
     document.addEventListener('keydown', e => {
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ')  go(cur + 1);
-      if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')                     go(cur - 1);
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') go(cur + 1);
+      if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')                    go(cur - 1);
     });
 
     sync();
